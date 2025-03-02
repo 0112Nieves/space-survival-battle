@@ -46,6 +46,22 @@ def draw_text(surf, text, size, x, y):
     text_rect.centerx = x
     text_rect.top = y
     surf.blit(text_surface, text_rect)
+    
+def new_rock():
+    rock = Rock()
+    all_sprites.add(rock)
+    rocks.add(rock)
+    
+def draw_health(surf, hp, x, y):
+    if hp < 0:
+        hp = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (hp/100)*BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -57,6 +73,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
+        self.health = 100
         
     def update(self):
         key_pressed = pygame.key.get_pressed()
@@ -130,9 +147,7 @@ bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 for i in range(8):
-    rock = Rock()
-    all_sprites.add(rock)
-    rocks.add(rock)
+    new_rock()
 score = 0
 pygame.mixer.music.play(-1)
 
@@ -155,19 +170,21 @@ while running:
     for hit in hits:
         random.choice(expls_sounds).play()
         score += hit.radius
-        rock = Rock()
-        all_sprites.add(rock)
-        rocks.add(rock)
+        new_rock()
         
-    hits = pygame.sprite.spritecollide(player, rocks, False, pygame.sprite.collide_circle)
-    if hits:
-        running = False
+    hits = pygame.sprite.spritecollide(player, rocks, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        new_rock()
+        player.health -= hit.radius
+        if player.health <= 0:
+            running = False
     
     # 畫面顯示
     screen.fill(BLACK)
     screen.blit(background_img, (0, 0))
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH/2, 10)
+    draw_health(screen, player.health, 5, 15)
     pygame.display.update()
     
 pygame.quit()
