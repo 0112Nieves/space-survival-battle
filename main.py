@@ -257,6 +257,15 @@ class Power(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill() 
         
+all_sprites = pygame.sprite.Group()
+rocks = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
+powers = pygame.sprite.Group()
+player = Player()
+all_sprites.add(player)
+for i in range(8):
+    new_rock()
+score = 0
 pygame.mixer.music.play(-1)
 
 show_init = True
